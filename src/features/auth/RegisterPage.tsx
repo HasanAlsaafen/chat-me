@@ -35,7 +35,7 @@ export function RegisterPage() {
   };
 
   return (
-    <AuthLayout subtitle="Create an account to get started">
+    <AuthLayout title="Create your account" subtitle="Get started with ChatMe for free">
       <OAuthButtons />
       <div className="my-6 flex items-center gap-3 text-xs font-medium text-neutral-90 dark:text-gray-500">
         <div className="h-px flex-1 bg-neutral-40 dark:bg-gray-800" />

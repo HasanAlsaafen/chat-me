@@ -1,40 +1,49 @@
 import type { ReactNode } from 'react';
-import logo from '../../assets/logo.png';
 
 interface AuthLayoutProps {
+  title: string;
   subtitle: string;
   children: ReactNode;
 }
 
-export function AuthLayout({ subtitle, children }: AuthLayoutProps) {
+function LogoMark({ className = '' }: { className?: string }) {
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-neutral-20 px-4 py-10 dark:bg-gray-950">
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-        <div
-          className="auth-blob -left-24 -top-24 size-80 bg-brand-400"
-          style={{ animationDelay: "0s" }}
-        />
-        <div
-          className="auth-blob -right-20 top-1/3 size-72 bg-discovery-400"
-          style={{ animationDelay: "-7s" }}
-        />
-        <div
-          className="auth-blob bottom-[-6rem] left-1/4 size-96 bg-brand-300"
-          style={{ animationDelay: "-14s" }}
-        />
-        <div className="auth-noise absolute inset-0" />
-      </div>
-      <div className="auth-card-enter relative z-10 w-full max-w-[420px]">
-        <div className="mb-10 flex flex-col items-center gap-3 text-center">
-          <img src={logo} alt="ChatMe" className="size-16 drop-shadow-[0_4px_14px_rgba(0,101,255,0.35)]" />
-          <div className="flex flex-col gap-1.5">
-            <h1 className="text-2xl font-bold tracking-tight text-neutral-800 dark:text-gray-100">
-              ChatMe
-            </h1>
-            <p className="text-sm text-neutral-300 dark:text-gray-400">{subtitle}</p>
-          </div>
+    <svg viewBox="0 0 48 48" className={`size-8 ${className}`} aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M17 12h18a5 5 0 0 1 5 5v9a5 5 0 0 1-5 5H24l-6.4 5.02A1 1 0 0 1 16 35.24V31a5 5 0 0 1-5-5v-9a5 5 0 0 1 5-5z"
+      />
+    </svg>
+  );
+}
+
+export function AuthLayout({ title, subtitle, children }: AuthLayoutProps) {
+  return (
+    <div className="flex min-h-screen bg-white dark:bg-gray-950">
+      <div className="auth-panel-bg hidden w-[38%] max-w-[440px] flex-col justify-between bg-brand-600 px-10 py-12 text-white lg:flex">
+        <div className="flex items-center gap-2">
+          <LogoMark />
+          <span className="text-lg font-semibold">ChatMe</span>
         </div>
-        <div className="rounded-[3px] border border-neutral-40 bg-white/95 p-7 shadow-[0_8px_30px_rgba(9,30,66,0.12)] backdrop-blur-sm dark:border-gray-800/80 dark:bg-gray-900/90 dark:shadow-[0_8px_30px_rgba(0,0,0,0.45)]">
+        <p className="text-2xl font-medium leading-snug text-white/90">
+          Fast, focused messaging for teams that ship.
+        </p>
+        <p className="text-sm text-white/60">&copy; {new Date().getFullYear()} ChatMe</p>
+      </div>
+      <div className="flex flex-1 flex-col items-center justify-center px-4 py-12 sm:px-6">
+        <div className="flex items-center gap-2 pb-10 lg:hidden">
+          <LogoMark className="text-brand-600 dark:text-brand-400" />
+          <span className="text-lg font-semibold text-neutral-800 dark:text-gray-100">
+            ChatMe
+          </span>
+        </div>
+        <div className="w-full max-w-[360px]">
+          <div className="mb-8">
+            <h1 className="text-xl font-semibold text-neutral-800 dark:text-gray-100">
+              {title}
+            </h1>
+            <p className="mt-1 text-sm text-neutral-300 dark:text-gray-400">{subtitle}</p>
+          </div>
           {children}
         </div>
       </div>
