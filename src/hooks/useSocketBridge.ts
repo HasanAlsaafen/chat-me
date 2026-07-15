@@ -4,6 +4,7 @@ import { getSocket } from "../lib/socket";
 import { useChatStore } from "../store/chatStore";
 import { useNotificationStore } from "../store/notificationStore";
 import { useAuthStore } from "../store/authStore";
+import { useLocalPrefsStore } from "../store/localPrefsStore";
 import type { Message, MessageStatusValue, NotificationType } from "../types";
 
 interface DeliveredPayload {
@@ -96,7 +97,14 @@ export function useSocketBridge() {
     };
 
     const handleNotification = (data: LiveNotificationPayload) => {
-      if (data.type === "new_message") {
+      const conversationId = data.payload.conversationId;
+      const muted = conversationId
+        ? Boolean(
+            useLocalPrefsStore.getState().conversationFlags[conversationId]
+              ?.muted,
+          )
+        : false;
+      if (data.type === "new_message" && !muted) {
         toast(
           `${data.payload.senderName ?? "New message"}: ${data.payload.preview ?? ""}`,
         );

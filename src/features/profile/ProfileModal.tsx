@@ -133,7 +133,7 @@ export function ProfileModal({
             onChange={(e) => setBio(e.target.value)}
             maxLength={160}
             rows={3}
-            className="w-full rounded-[3px] border border-neutral-40 bg-neutral-10 px-3 py-2 text-sm text-neutral-800 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+            className="w-full rounded-[3px] border border-neutral-40 bg-neutral-10 px-3 py-2 text-sm text-neutral-800 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:focus:bg-gray-900"
           />
           <p className="mt-1 text-right text-xs text-neutral-100">
             {bio.length}/160

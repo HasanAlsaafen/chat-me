@@ -5,6 +5,8 @@ import {
   CheckCheck,
   Download,
   Pencil,
+  Pin,
+  PinOff,
   Reply,
   FileText,
   Trash2,
@@ -16,7 +18,9 @@ import type { Conversation, Message } from "../../types";
 import { getId } from "../../utils/id";
 import { formatMessageTime } from "../../utils/date";
 import { aggregateStatus } from "../../utils/messageStatus";
+import { renderRichText } from "../../utils/richText";
 import { useChatStore } from "../../store/chatStore";
+import { useLocalPrefsStore } from "../../store/localPrefsStore";
 import { getSocket } from "../../lib/socket";
 
 const QUICK_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
@@ -103,7 +107,9 @@ function MessageContent({
       );
     default:
       return (
-        <p className="whitespace-pre-wrap break-words">{message.content}</p>
+        <p className="whitespace-pre-wrap break-words">
+          {renderRichText(message.content)}
+        </p>
       );
   }
 }
@@ -180,6 +186,15 @@ export function MessageBubble({
   const conversationId = getId(conversation);
   const updateMessage = useChatStore((s) => s.updateMessage);
   const setReaction = useChatStore((s) => s.setReaction);
+  const messageId = getId(message);
+  const isPinned = useLocalPrefsStore((s) =>
+    (s.pinnedMessagesByConversation[conversationId] ?? []).includes(
+      messageId,
+    ),
+  );
+  const togglePinnedMessage = useLocalPrefsStore(
+    (s) => s.togglePinnedMessage,
+  );
 
   const senderId = getId(message.sender);
   const isOwn = senderId === currentUserId;
@@ -239,12 +254,13 @@ export function MessageBubble({
 
   return (
     <div
+      id={`message-${messageId}`}
       className={clsx(
         "group flex items-end gap-2",
         isOwn ? "flex-row-reverse" : "flex-row",
       )}
     >
-      {!isOwn && conversation.type === "group" && (
+      {!isOwn && (
         <div className="w-8">
           {showSenderInfo && (
             <Avatar src={sender.avatar} name={sender.displayName} size="sm" />
@@ -273,6 +289,14 @@ export function MessageBubble({
                 : "rounded-bl-[3px] bg-neutral-20 text-neutral-800 dark:bg-gray-800 dark:text-gray-100",
             )}
           >
+            {isPinned && (
+              <Pin
+                className={clsx(
+                  "mb-1 size-3",
+                  isOwn ? "text-white/80" : "text-brand-600",
+                )}
+              />
+            )}
             <ReplyPreview replyTo={message.replyTo} conversationId={conversationId} />
             {isEditing ? (
               <div className="flex flex-col gap-1.5">
@@ -345,6 +369,24 @@ export function MessageBubble({
                 className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-20 dark:text-gray-200 dark:hover:bg-gray-800"
               >
                 <Reply className="size-4" /> Reply
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  togglePinnedMessage(conversationId, messageId);
+                  setMenuPos(null);
+                }}
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-20 dark:text-gray-200 dark:hover:bg-gray-800"
+              >
+                {isPinned ? (
+                  <>
+                    <PinOff className="size-4" /> Unpin message
+                  </>
+                ) : (
+                  <>
+                    <Pin className="size-4" /> Pin message
+                  </>
+                )}
               </button>
               {canModify && (
                 <>

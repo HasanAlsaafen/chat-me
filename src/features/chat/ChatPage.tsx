@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ChatHeader } from "./ChatHeader";
+import { PinnedMessagesBar } from "./PinnedMessagesBar";
 import { MessageList } from "./MessageList";
 import { MessageInput } from "./MessageInput";
 import { FullPageSpinner } from "../../components/ui/Spinner";
@@ -45,6 +46,7 @@ export function ChatPage() {
         conversation={conversation}
         currentUserId={getId(currentUser)}
       />
+      <PinnedMessagesBar conversation={conversation} />
       <MessageList
         conversation={conversation}
         currentUserId={getId(currentUser)}

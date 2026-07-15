@@ -1,6 +1,7 @@
 import { Route, Routes, useLocation } from "react-router-dom";
 import clsx from "clsx";
 import { Sidebar } from "./Sidebar";
+import { CommandPalette } from "./CommandPalette";
 import { ChatPage } from "../chat/ChatPage";
 import { EmptyChatState } from "../chat/EmptyChatState";
 import { useConversations } from "../../hooks/useConversations";
@@ -17,6 +18,7 @@ export function ChatShell() {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-white dark:bg-gray-950">
+      <CommandPalette />
       <div
         className={clsx(
           "h-full w-full shrink-0 md:w-80",
