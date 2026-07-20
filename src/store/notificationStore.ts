@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Notification } from "../types";
+import type { Notification, NewMessageNotificationPayload } from "../types";
 import { getId } from "../utils/id";
 
 interface NotificationState {
@@ -10,6 +10,7 @@ interface NotificationState {
   addNotification: (notification: Notification) => void;
   markAsRead: (id: string) => void;
   markAllAsRead: () => void;
+  markConversationAsRead: (conversationId: string) => Notification[];
 }
 
 export const useNotificationStore = create<NotificationState>((set, get) => ({
@@ -31,4 +32,20 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   },
 
   markAllAsRead: () => set({ unread: [], count: 0 }),
+
+  markConversationAsRead: (conversationId) => {
+    const removed = get().unread.filter(
+      (n) =>
+        n.type === "new_message" &&
+        (n.payload as NewMessageNotificationPayload).conversationId ===
+          conversationId,
+    );
+    if (removed.length === 0) return [];
+    const removedIds = new Set(removed.map((n) => getId(n)));
+    set({
+      unread: get().unread.filter((n) => !removedIds.has(getId(n))),
+      count: Math.max(0, get().count - removed.length),
+    });
+    return removed;
+  },
 }));

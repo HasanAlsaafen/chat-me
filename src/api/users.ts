@@ -6,11 +6,29 @@ export interface UpdateProfilePayload {
   bio?: string;
 }
 
+export interface UserPresence {
+  userId: string;
+  online: boolean;
+  lastSeenAt?: string;
+}
+
 export const usersApi = {
   search: (q: string) =>
     apiClient
       .get<User[]>("/users/search", { params: { q } })
       .then((r) => r.data),
+
+  getPresence: (id: string) =>
+    apiClient.get<UserPresence>(`/users/${id}/presence`).then((r) => r.data),
+
+  block: (id: string) =>
+    apiClient.post<void>(`/users/${id}/block`).then((r) => r.data),
+
+  unblock: (id: string) =>
+    apiClient.delete<void>(`/users/${id}/block`).then((r) => r.data),
+
+  listBlocked: () =>
+    apiClient.get<User[]>("/users/blocked").then((r) => r.data),
 
   updateProfile: (payload: UpdateProfilePayload) =>
     apiClient.patch<User>("/users/me", payload).then((r) => r.data),

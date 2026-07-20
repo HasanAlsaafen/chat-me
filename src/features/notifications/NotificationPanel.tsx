@@ -1,15 +1,19 @@
 import { useNavigate } from "react-router-dom";
-import { Bell, MessageSquare, UserPlus, UserMinus } from "lucide-react";
+import { Bell, MessageSquare, Phone, UserPlus, UserMinus, Video } from "lucide-react";
 import { notificationsApi } from "../../api/notifications";
 import { useNotificationStore } from "../../store/notificationStore";
 import { formatRelative } from "../../utils/date";
 import { getId } from "../../utils/id";
-import type { NewMessageNotificationPayload } from "../../types";
+import type {
+  MissedCallNotificationPayload,
+  NewMessageNotificationPayload,
+} from "../../types";
 
-function iconFor(type: string) {
+function iconFor(type: string, callType?: string) {
   if (type === "new_message") return MessageSquare;
   if (type === "group_added") return UserPlus;
   if (type === "group_removed") return UserMinus;
+  if (type === "missed_call") return callType === "video" ? Video : Phone;
   return Bell;
 }
 
@@ -64,8 +68,14 @@ export function NotificationPanel({ close }: { close: () => void }) {
           </p>
         )}
         {unread.map((n) => {
-          const Icon = iconFor(n.type);
-          const payload = n.payload as NewMessageNotificationPayload;
+          const isMissedCall = n.type === "missed_call";
+          const payload = n.payload as
+            | NewMessageNotificationPayload
+            | MissedCallNotificationPayload;
+          const Icon = iconFor(
+            n.type,
+            isMissedCall ? (payload as MissedCallNotificationPayload).type : undefined,
+          );
           return (
             <button
               type="button"
@@ -78,7 +88,14 @@ export function NotificationPanel({ close }: { close: () => void }) {
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm text-neutral-800 dark:text-gray-100">
-                  {payload.senderName ? (
+                  {isMissedCall ? (
+                    <>
+                      <span className="font-medium">
+                        {(payload as MissedCallNotificationPayload).callerName}
+                      </span>{" "}
+                      missed {(payload as MissedCallNotificationPayload).type} call
+                    </>
+                  ) : "senderName" in payload && payload.senderName ? (
                     <>
                       <span className="font-medium">{payload.senderName}</span>{" "}
                       {payload.preview}

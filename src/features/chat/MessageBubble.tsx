@@ -12,6 +12,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { Avatar } from "../../components/ui/Avatar";
+import { ImageLightbox } from "../../components/ui/ImageLightbox";
 import { VoiceMessage } from "./VoiceMessage";
 import { MessageContextMenu } from "./MessageContextMenu";
 import type { Conversation, Message } from "../../types";
@@ -76,19 +77,33 @@ function MessageContent({
   message: Message;
   isOwn: boolean;
 }) {
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+
   if (message.isDeleted) {
     return <p className="italic text-neutral-100">This message was deleted</p>;
   }
   switch (message.type) {
     case "image":
       return (
-        <a href={message.content} target="_blank" rel="noreferrer">
-          <img
-            src={message.content}
-            alt="Shared"
-            className="max-h-64 max-w-xs rounded-[6px] object-cover"
-          />
-        </a>
+        <>
+          <button
+            type="button"
+            onClick={() => setLightboxOpen(true)}
+            className="block"
+          >
+            <img
+              src={message.content}
+              alt="Shared"
+              className="max-h-64 max-w-xs rounded-[6px] object-cover"
+            />
+          </button>
+          {lightboxOpen && (
+            <ImageLightbox
+              src={message.content}
+              onClose={() => setLightboxOpen(false)}
+            />
+          )}
+        </>
       );
     case "audio":
       return <VoiceMessage src={message.content} isOwn={isOwn} />;

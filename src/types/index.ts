@@ -69,12 +69,23 @@ export interface Message {
   updatedAt: string;
 }
 
-export type NotificationType = "new_message" | "group_added" | "group_removed";
+export type NotificationType =
+  | "new_message"
+  | "group_added"
+  | "group_removed"
+  | "missed_call";
 
 export interface NewMessageNotificationPayload {
   conversationId: string;
   senderName: string;
   preview: string;
+}
+
+export interface MissedCallNotificationPayload {
+  conversationId: string;
+  callId: string;
+  callerName: string;
+  type: CallType;
 }
 
 export interface Notification {
@@ -96,4 +107,34 @@ export interface ApiError {
   message: string | string[];
   error?: string;
   statusCode?: number;
+}
+
+export type CallType = "audio" | "video";
+
+export type CallEndReason =
+  | "rejected"
+  | "ended"
+  | "no_answer"
+  | "unavailable"
+  | "disconnected";
+
+export interface IceServer {
+  urls: string | string[];
+  username?: string;
+  credential?: string;
+}
+
+export interface Call {
+  id: string;
+  _id?: string;
+  conversation: string;
+  caller: User | string;
+  callee: User | string;
+  type: CallType;
+  status: CallEndReason | "answered";
+  startedAt?: string;
+  endedAt?: string;
+  duration?: number;
+  createdAt: string;
+  updatedAt: string;
 }

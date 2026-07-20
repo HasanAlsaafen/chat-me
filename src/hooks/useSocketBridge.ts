@@ -5,6 +5,7 @@ import { useChatStore } from "../store/chatStore";
 import { useNotificationStore } from "../store/notificationStore";
 import { useAuthStore } from "../store/authStore";
 import { useLocalPrefsStore } from "../store/localPrefsStore";
+import { usePresenceStore } from "../store/presenceStore";
 import type { Message, MessageStatusValue, NotificationType } from "../types";
 
 interface DeliveredPayload {
@@ -49,9 +50,24 @@ interface ReactionRemovedPayload {
   userId: string;
 }
 
+interface UserOnlinePayload {
+  userId: string;
+}
+
+interface UserOfflinePayload {
+  userId: string;
+  lastSeenAt: string;
+}
+
 interface LiveNotificationPayload {
   type: NotificationType;
-  payload: { conversationId?: string; senderName?: string; preview?: string };
+  payload: {
+    conversationId?: string;
+    senderName?: string;
+    preview?: string;
+    callerName?: string;
+    type?: string;
+  };
 }
 
 let liveNotificationSeq = 0;
@@ -65,6 +81,8 @@ export function useSocketBridge() {
   const removeReaction = useChatStore((s) => s.removeReaction);
   const setTyping = useChatStore((s) => s.setTyping);
   const addNotification = useNotificationStore((s) => s.addNotification);
+  const setOnline = usePresenceStore((s) => s.setOnline);
+  const setOffline = usePresenceStore((s) => s.setOffline);
 
   useEffect(() => {
     if (status !== "authenticated") return;
@@ -98,6 +116,10 @@ export function useSocketBridge() {
 
     const handleNotification = (data: LiveNotificationPayload) => {
       const conversationId = data.payload.conversationId;
+      const isActiveConversation =
+        conversationId !== undefined &&
+        conversationId === useChatStore.getState().activeConversationId;
+      if (data.type === "new_message" && isActiveConversation) return;
       const muted = conversationId
         ? Boolean(
             useLocalPrefsStore.getState().conversationFlags[conversationId]
@@ -107,6 +129,11 @@ export function useSocketBridge() {
       if (data.type === "new_message" && !muted) {
         toast(
           `${data.payload.senderName ?? "New message"}: ${data.payload.preview ?? ""}`,
+        );
+      }
+      if (data.type === "missed_call") {
+        toast(
+          `Missed ${data.payload.type ?? "audio"} call from ${data.payload.callerName ?? "someone"}`,
         );
       }
       liveNotificationSeq += 1;
@@ -155,6 +182,14 @@ export function useSocketBridge() {
       removeReaction(data.conversationId, data.messageId, data.userId);
     };
 
+    const handleUserOnline = (data: UserOnlinePayload) => {
+      setOnline(data.userId);
+    };
+
+    const handleUserOffline = (data: UserOfflinePayload) => {
+      setOffline(data.userId, data.lastSeenAt);
+    };
+
     socket.on("new_message", handleNewMessage);
     socket.on("messages_delivered", handleDelivered);
     socket.on("message_read", handleRead);
@@ -166,6 +201,8 @@ export function useSocketBridge() {
     socket.on("message_deleted", handleDeleted);
     socket.on("message_reaction_added", handleReactionAdded);
     socket.on("message_reaction_removed", handleReactionRemoved);
+    socket.on("user_online", handleUserOnline);
+    socket.on("user_offline", handleUserOffline);
 
     return () => {
       socket.off("new_message", handleNewMessage);
@@ -179,6 +216,8 @@ export function useSocketBridge() {
       socket.off("message_deleted", handleDeleted);
       socket.off("message_reaction_added", handleReactionAdded);
       socket.off("message_reaction_removed", handleReactionRemoved);
+      socket.off("user_online", handleUserOnline);
+      socket.off("user_offline", handleUserOffline);
     };
   }, [
     status,
@@ -189,5 +228,7 @@ export function useSocketBridge() {
     removeReaction,
     setTyping,
     addNotification,
+    setOnline,
+    setOffline,
   ]);
 }

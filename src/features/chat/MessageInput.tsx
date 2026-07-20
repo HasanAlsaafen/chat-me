@@ -20,6 +20,7 @@ import { getId } from "../../utils/id";
 import { EMOJI_SHORTCODES } from "../../utils/emoji";
 import { useChatStore } from "../../store/chatStore";
 import { useAuthStore } from "../../store/authStore";
+import { ImageEditor } from "./ImageEditor";
 import type { Message } from "../../types";
 
 interface Props {
@@ -54,6 +55,7 @@ export function MessageInput({
 }: Props) {
   const [text, setText] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [editingImage, setEditingImage] = useState<File | null>(null);
   const [activeTrigger, setActiveTrigger] = useState<ActiveTrigger | null>(
     null,
   );
@@ -200,10 +202,15 @@ export function MessageInput({
     }
   };
 
-  const handleImagePick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImagePick = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
+    setEditingImage(file);
+  };
+
+  const sendImage = async (file: File) => {
+    setEditingImage(null);
     setUploading(true);
     try {
       const result = await uploadApi.image(file);
@@ -253,7 +260,7 @@ export function MessageInput({
   };
 
   return (
-    <div className="border-t border-neutral-30 bg-white px-4 py-3 dark:border-gray-800 dark:bg-gray-950">
+    <div className="border-t border-neutral-30we bg-white px-4 py-3 dark:border-gray-800 dark:bg-gray-950">
       {replyTo && (
         <div className="mb-2 flex items-center justify-between rounded-[3px] bg-neutral-20 px-3 py-1.5 text-xs text-neutral-600 dark:bg-gray-800 dark:text-gray-300">
           <span className="truncate">
@@ -408,6 +415,13 @@ export function MessageInput({
           </button>
         )}
       </div>
+      {editingImage && (
+        <ImageEditor
+          file={editingImage}
+          onCancel={() => setEditingImage(null)}
+          onConfirm={(file) => void sendImage(file)}
+        />
+      )}
     </div>
   );
 }

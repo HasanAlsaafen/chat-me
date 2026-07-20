@@ -7,11 +7,16 @@ import { EmptyChatState } from "../chat/EmptyChatState";
 import { useConversations } from "../../hooks/useConversations";
 import { useNotifications } from "../../hooks/useNotifications";
 import { useSocketBridge } from "../../hooks/useSocketBridge";
+import { useBlockedUsers } from "../../hooks/useBlockedUsers";
+import { useCallSignaling } from "../../hooks/useCallSignaling";
+import { CallOverlay } from "../calls/CallOverlay";
 
 export function ChatShell() {
   useConversations();
   useNotifications();
   useSocketBridge();
+  useBlockedUsers();
+  useCallSignaling();
 
   const location = useLocation();
   const hasActiveConversation = location.pathname.startsWith("/c/");
@@ -19,6 +24,7 @@ export function ChatShell() {
   return (
     <div className="flex h-screen w-full overflow-hidden bg-white dark:bg-gray-950">
       <CommandPalette />
+      <CallOverlay />
       <div
         className={clsx(
           "h-full w-full shrink-0 md:w-80",
