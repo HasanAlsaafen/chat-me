@@ -13,11 +13,14 @@ import { RegisterPage } from "./features/auth/RegisterPage";
 import { OAuthCallbackPage } from "./features/auth/OAuthCallbackPage";
 import { ProtectedRoute, PublicOnlyRoute } from "./routes/ProtectedRoute";
 import { ChatShell } from "./features/conversations/ChatShell";
+import { MaintenancePage } from "./features/maintenance/MaintenancePage";
 import { useAuthStore } from "./store/authStore";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, retry: 1 } },
 });
+
+const MAINTENANCE_MODE = import.meta.env.VITE_MAINTENANCE_MODE === "true";
 
 function AuthBootstrap() {
   const init = useAuthStore((s) => s.init);
@@ -48,6 +51,16 @@ function AuthBootstrap() {
 }
 
 function App() {
+  if (MAINTENANCE_MODE) {
+    return (
+      <BrowserRouter>
+        <Routes>
+          <Route path="/*" element={<MaintenancePage />} />
+        </Routes>
+      </BrowserRouter>
+    );
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
